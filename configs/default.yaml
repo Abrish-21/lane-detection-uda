@@ -1,6 +1,6 @@
 data:
-  root: C:\Users\remoteuser\research\lane-detection-uda\data
-  splits_root: C:\Users\remoteuser\research\lane-detection-uda\splits
+  root: C:/Users/remoteuser/research/lane-detection-uda/data/CARLANE/MoLane/data
+  splits_root: C:/Users/remoteuser/research/lane-detection-uda/data/CARLANE/MoLane/splits
   img_height: 360
   img_width: 640
 
