@@ -66,7 +66,7 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device, use_amp=Fal
 
         optimizer.zero_grad()
         if use_amp:
-            with torch.cuda.amp.autocast(enabled=True):
+            with torch.amp.autocast(device_type=device.type, enabled=True):
                 outputs = model(images)
                 loss = criterion(outputs, masks)
             scaler.scale(loss).backward()
@@ -92,7 +92,7 @@ def validate(model, dataloader, criterion, device, use_amp=False):
             if masks.dim() == 4 and masks.shape[1] == 1:
                 masks = masks.squeeze(1)
             if use_amp:
-                with torch.cuda.amp.autocast(enabled=True):
+                with torch.amp.autocast(device_type=device.type, enabled=True):
                     outputs = model(images)
                     loss = criterion(outputs, masks)
             else:

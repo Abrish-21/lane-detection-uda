@@ -79,7 +79,7 @@ def train_adaptation(model, src_loader, tgt_loader, val_loader, config, device, 
 
             optimizer.zero_grad()
             if use_amp:
-                with torch.cuda.amp.autocast(enabled=True):
+                with torch.amp.autocast(device_type=device.type, enabled=True):
                     src_logits = model(src_images)
                     sup_loss = criterion(src_logits, src_masks)
 
