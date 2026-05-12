@@ -1,9 +1,11 @@
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 from src.utils.logger import get_logger, success
-from .trainer_utils import entropy_loss, validate
+from .trainer_utils import entropy_loss, load_checkpoint, save_checkpoint, validate
 
 def train_adaptation(model, src_loader, tgt_loader, val_loader, config, device, save_path, logger=None):
     logger = logger or get_logger()
@@ -14,9 +16,34 @@ def train_adaptation(model, src_loader, tgt_loader, val_loader, config, device, 
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
-    best_val_loss = float('inf')
+    output_dir = Path(config.get('output_dir', '.'))
+    checkpoint_dir = output_dir / 'results' / 'checkpoints' / 'adaptation'
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    save_interval = config.get('training', {}).get('save_interval')
+    if save_interval is None:
+        save_interval = config.get('logging', {}).get('save_interval', 1)
 
-    for epoch in range(epochs):
+    best_val_loss = float('inf')
+    start_epoch = 0
+    resume_from = config.get('training', {}).get('resume_from')
+    resume_path = None
+    if resume_from and str(resume_from).lower() != 'auto':
+        resume_path = Path(resume_from)
+    else:
+        last_checkpoint = checkpoint_dir / 'last.pth'
+        if last_checkpoint.exists():
+            resume_path = last_checkpoint
+
+    if resume_path is not None:
+        if resume_path.exists():
+            checkpoint = load_checkpoint(resume_path, model, optimizer, scheduler, device=device)
+            start_epoch = checkpoint.get('epoch', -1) + 1
+            best_val_loss = checkpoint.get('best_val_loss', best_val_loss)
+            logger.info("Resuming adaptation training from %s (epoch %d)", resume_path, start_epoch + 1)
+        else:
+            logger.warning("Resume checkpoint not found at %s. Starting fresh.", resume_path)
+
+    for epoch in range(start_epoch, epochs):
         model.train()
         total_sup_loss = 0.0
         total_ent_loss = 0.0
@@ -81,3 +108,10 @@ def train_adaptation(model, src_loader, tgt_loader, val_loader, config, device, 
             success(logger, "Saved best adapted model to %s", save_path)
 
         scheduler.step()
+
+        if save_interval and (epoch + 1) % save_interval == 0:
+            interval_path = checkpoint_dir / f"epoch_{epoch + 1:04d}.pth"
+            save_checkpoint(interval_path, model, optimizer, scheduler, epoch, best_val_loss)
+
+        last_path = checkpoint_dir / 'last.pth'
+        save_checkpoint(last_path, model, optimizer, scheduler, epoch, best_val_loss)

@@ -1,12 +1,12 @@
 data:
-  root: /path/to/carlane/MoLane/data
-  splits_root: /path/to/carlane/MoLane/splits
+  root: C:\Users\remoteuser\research\lane-detection-uda\data
+  splits_root: C:\Users\remoteuser\research\lane-detection-uda\splits
   img_height: 360
   img_width: 640
 
 training:
-  batch_size: 8
-  num_epochs: 50
+  batch_size: 16
+  num_epochs: 20
   learning_rate: 1e-4
   device: cuda
   seed: 42
