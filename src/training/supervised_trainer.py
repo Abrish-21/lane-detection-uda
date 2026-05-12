@@ -14,6 +14,8 @@ def train_supervised(model, train_loader, val_loader, config, device, save_path,
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    use_amp = bool(config.get('training', {}).get('use_amp', False)) and device.type == 'cuda'
+    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
 
     output_dir = Path(config.get('output_dir', '.'))
     checkpoint_dir = output_dir / 'results' / 'checkpoints' / 'supervised'
@@ -46,8 +48,9 @@ def train_supervised(model, train_loader, val_loader, config, device, save_path,
 
     for epoch in range(start_epoch, epochs):
         logger.info("Epoch %d/%d", epoch + 1, epochs)
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
-        val_loss = validate(model, val_loader, criterion, device)
+        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device,
+                         use_amp=use_amp, scaler=scaler)
+        val_loss = validate(model, val_loader, criterion, device, use_amp=use_amp)
         scheduler.step()
 
         writer.add_scalar('Loss/train', train_loss, epoch)

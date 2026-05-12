@@ -64,6 +64,12 @@ def main(args):
     set_seed(config['training']['seed'])
     device = torch.device(config['training']['device']
                           if torch.cuda.is_available() else 'cpu')
+    if device.type == 'cuda':
+        if config.get('training', {}).get('enable_cudnn_benchmark', True):
+            torch.backends.cudnn.benchmark = True
+        if config.get('training', {}).get('enable_tf32', True):
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
     logger = setup_logger(log_dir=config['logging']['log_dir'])
     banner(logger, "Lane Detection Pipeline", f"Mode={args.mode} • Device={device}")
 
@@ -101,16 +107,30 @@ def main(args):
                                                    transform=val_transform, is_labeled=True)
     # Dataloaders
     batch_size = config['training']['batch_size']
-    source_train_loader = DataLoader(source_train_dataset, batch_size=batch_size,
-                                     shuffle=True, num_workers=2)
-    source_val_loader   = DataLoader(source_val_dataset, batch_size=batch_size,
-                                     shuffle=False, num_workers=2)
-    target_train_loader = DataLoader(target_train_dataset, batch_size=batch_size,
-                                     shuffle=True, num_workers=2)
-    target_val_loader   = DataLoader(target_val_dataset, batch_size=batch_size,
-                                     shuffle=False, num_workers=2)
-    target_test_loader  = DataLoader(target_test_dataset, batch_size=batch_size,
-                                     shuffle=False, num_workers=2)
+    data_cfg = config.get('data', {})
+    num_workers = int(data_cfg.get('num_workers', 2))
+    pin_memory = bool(data_cfg.get('pin_memory', device.type == 'cuda'))
+    persistent_workers = bool(data_cfg.get('persistent_workers', num_workers > 0))
+    prefetch_factor = int(data_cfg.get('prefetch_factor', 2))
+
+    def build_loader(dataset, shuffle):
+        loader_kwargs = {
+            'batch_size': batch_size,
+            'shuffle': shuffle,
+            'num_workers': num_workers,
+        }
+        if pin_memory:
+            loader_kwargs['pin_memory'] = True
+        if num_workers > 0:
+            loader_kwargs['persistent_workers'] = persistent_workers
+            loader_kwargs['prefetch_factor'] = prefetch_factor
+        return DataLoader(dataset, **loader_kwargs)
+
+    source_train_loader = build_loader(source_train_dataset, shuffle=True)
+    source_val_loader = build_loader(source_val_dataset, shuffle=False)
+    target_train_loader = build_loader(target_train_dataset, shuffle=True)
+    target_val_loader = build_loader(target_val_dataset, shuffle=False)
+    target_test_loader = build_loader(target_test_dataset, shuffle=False)
 
     # ----- Model definition -------------------------------------------------
     n_classes = config['model']['n_classes']

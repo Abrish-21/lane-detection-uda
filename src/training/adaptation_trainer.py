@@ -15,6 +15,8 @@ def train_adaptation(model, src_loader, tgt_loader, val_loader, config, device, 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
     scheduler = optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    use_amp = bool(config.get('training', {}).get('use_amp', False)) and device.type == 'cuda'
+    scaler = torch.cuda.amp.GradScaler(enabled=use_amp)
 
     output_dir = Path(config.get('output_dir', '.'))
     checkpoint_dir = output_dir / 'results' / 'checkpoints' / 'adaptation'
@@ -76,15 +78,28 @@ def train_adaptation(model, src_loader, tgt_loader, val_loader, config, device, 
             tgt_images = tgt_images.to(device)
 
             optimizer.zero_grad()
-            src_logits = model(src_images)
-            sup_loss = criterion(src_logits, src_masks)
+            if use_amp:
+                with torch.cuda.amp.autocast(enabled=True):
+                    src_logits = model(src_images)
+                    sup_loss = criterion(src_logits, src_masks)
 
-            tgt_logits = model(tgt_images)
-            ent_loss = entropy_loss(tgt_logits)
+                    tgt_logits = model(tgt_images)
+                    ent_loss = entropy_loss(tgt_logits)
 
-            loss = sup_loss + alpha * ent_loss
-            loss.backward()
-            optimizer.step()
+                    loss = sup_loss + alpha * ent_loss
+                scaler.scale(loss).backward()
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                src_logits = model(src_images)
+                sup_loss = criterion(src_logits, src_masks)
+
+                tgt_logits = model(tgt_images)
+                ent_loss = entropy_loss(tgt_logits)
+
+                loss = sup_loss + alpha * ent_loss
+                loss.backward()
+                optimizer.step()
 
             total_sup_loss += sup_loss.item()
             total_ent_loss += ent_loss.item()
@@ -99,7 +114,7 @@ def train_adaptation(model, src_loader, tgt_loader, val_loader, config, device, 
             total_ent_loss / num_batches,
         )
 
-        val_loss = validate(model, val_loader, criterion, device)
+        val_loss = validate(model, val_loader, criterion, device, use_amp=use_amp)
         logger.info("Target Val Loss=%.4f", val_loss)
 
         if val_loss < best_val_loss:

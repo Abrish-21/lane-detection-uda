@@ -54,7 +54,7 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, scheduler=None, devi
 
     return checkpoint
 
-def train_one_epoch(model, dataloader, optimizer, criterion, device):
+def train_one_epoch(model, dataloader, optimizer, criterion, device, use_amp=False, scaler=None):
     model.train()
     total_loss = 0.0
     pbar = tqdm(dataloader, desc="Training", colour="green")
@@ -65,16 +65,24 @@ def train_one_epoch(model, dataloader, optimizer, criterion, device):
             masks = masks.squeeze(1)
 
         optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, masks)
-        loss.backward()
-        optimizer.step()
+        if use_amp:
+            with torch.cuda.amp.autocast(enabled=True):
+                outputs = model(images)
+                loss = criterion(outputs, masks)
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            outputs = model(images)
+            loss = criterion(outputs, masks)
+            loss.backward()
+            optimizer.step()
 
         total_loss += loss.item()
         pbar.set_postfix(loss=f"{loss.item():.4f}")
     return total_loss / len(dataloader)
 
-def validate(model, dataloader, criterion, device):
+def validate(model, dataloader, criterion, device, use_amp=False):
     model.eval()
     total_loss = 0.0
     with torch.no_grad():
@@ -83,8 +91,13 @@ def validate(model, dataloader, criterion, device):
             masks = masks.to(device)
             if masks.dim() == 4 and masks.shape[1] == 1:
                 masks = masks.squeeze(1)
-            outputs = model(images)
-            loss = criterion(outputs, masks)
+            if use_amp:
+                with torch.cuda.amp.autocast(enabled=True):
+                    outputs = model(images)
+                    loss = criterion(outputs, masks)
+            else:
+                outputs = model(images)
+                loss = criterion(outputs, masks)
             total_loss += loss.item()
     return total_loss / len(dataloader)
 
