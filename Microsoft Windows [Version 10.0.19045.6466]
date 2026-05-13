@@ -1,0 +1,119 @@
+[33mcommit 9d87df7529146605814f08e551f1c5bfa0032ee3[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Author: cc <expert@revelo.com>
+Date:   Wed May 13 03:47:02 2026 +0530
+
+    increase batch size
+
+[33mcommit 1c9adfde79c196190aa1df5e748f9cc6ad19c76c[m
+Author: cc <expert@revelo.com>
+Date:   Wed May 13 03:08:35 2026 +0530
+
+    update batch size
+
+[33mcommit 828344758928ff777b07704a26c1cf4264030d3b[m
+Author: cc <expert@revelo.com>
+Date:   Wed May 13 02:52:11 2026 +0530
+
+    edit configs
+
+[33mcommit 3adabfc78db3ef59501b3d27734fcc94b0381029[m
+Author: cc <expert@revelo.com>
+Date:   Tue May 12 22:52:29 2026 +0530
+
+    check point to resume training
+
+[33mcommit f1d99ec0006f395b5501e6a14a0c1548b67839b9[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:26:11 2026 +0300
+
+    feat(workflow): add CI pipeline, gitignore rules, package setup, and project dependencies
+
+[33mcommit b9bcf56a43e37eef9b97c5e558e1f6c8cbb12ff8[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:25:34 2026 +0300
+
+    chore(scaffold): add tracked artifact directories and package init files for repository structure
+
+[33mcommit f46edfccd6db3baf7323c18c72355b72f99c9b96[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:24:41 2026 +0300
+
+    test(core): add baseline tests for dataset loading, metric correctness, and model forward pass
+
+[33mcommit 9a9dd02c447f0e173e5950936aa72809dfb92b2b[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:24:17 2026 +0300
+
+    docs(notebook): add exploratory training notebook for MoLane UDA experiments
+
+[33mcommit 976b71e5c6b20a0d2236be13063c155aaccb6e55[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:23:56 2026 +0300
+
+    docs(readme): expand project, dataset, and model documentation with usage and structure details
+
+[33mcommit 0dff5da2027a76d22b56ae564b888d59d6a11d83[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:23:30 2026 +0300
+
+    feat(utils): add metric and visualization helper utilities
+
+[33mcommit c013596418fb3078ebd05b092d6b0413568d1771[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:22:42 2026 +0300
+
+    feat(inference): add single-image inference script with lane overlay output
+
+[33mcommit 1736d751d01c4e2a696b5ba55c45c2accac3e737[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:22:21 2026 +0300
+
+    feat(report): generate HTML performance report with metrics table and embedded prediction visuals
+
+[33mcommit 64ba41c67a0d64fec4fd03241a1251d322e4c8d0[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:21:40 2026 +0300
+
+    feat(export): add ONNX and TorchScript export utilities with stable ONNX export settings
+
+[33mcommit 5b8ed3d2627dbc0386d7eb4900bad33a7aab11a8[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:21:23 2026 +0300
+
+    feat(logging): introduce clean green Linux-style CLI logging and unified logger helpers across pipeline
+
+[33mcommit 010a37492b9cf3edadd39073b3a820a06bc48134[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:20:14 2026 +0300
+
+    feat(evaluation): add target-domain evaluation loop with IoU/F1/Brier/entropy/FP/FN metrics
+
+[33mcommit 6635fe946e5cb3b77471c2ec2b73db34c05645cf[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:19:48 2026 +0300
+
+    feat(training): implement supervised and entropy-minimization UDA training with schedulers and checkpoints
+
+[33mcommit 6dbe353fc9e33c529e17454c16b6c561c22d99f1[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:19:17 2026 +0300
+
+    feat(model): add U-Net with ResNet34 encoder for binary lane segmentation
+
+[33mcommit 8b2d51e138de5816893a183131b07fd90b167878[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:18:49 2026 +0300
+
+    feat(data): implement MoLane split parsing, dataset loader, and augmentation transforms
+
+[33mcommit b9e6c66ff98135b57d620a3f2fc4e5df77455885[m
+Author: apeiron888 <aelafgetaneh@gmail.com>
+Date:   Sun Mar 29 06:17:44 2026 +0300
+
+    feat(config): add default and HPC YAML configs for dataset paths and training hyperparameters
+
+[33mcommit a9cc719179ed95621e90e49c62d75c8c99d199c2[m
+Author: Apeiron <153546847+apeiron888@users.noreply.github.com>
+Date:   Sun Mar 29 02:26:57 2026 +0300
+
+    Initial commit
