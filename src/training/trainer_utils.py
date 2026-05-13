@@ -37,8 +37,11 @@ def load_checkpoint(checkpoint_path, model, optimizer=None, scheduler=None, devi
 
     rng_state = checkpoint.get("rng_state", {})
     torch_state = rng_state.get("torch")
-    if torch_state is not None:
-        torch.random.set_rng_state(torch_state)
+    try:
+        if torch_state is not None:
+            torch.random.set_rng_state(torch_state)
+    except:
+        pass
 
     cuda_state = rng_state.get("cuda")
     if torch.cuda.is_available() and cuda_state is not None:
